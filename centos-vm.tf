@@ -31,7 +31,7 @@ resource "azurerm_subnet" "subnet1" {
 }
 
 resource "azurerm_network_interface" "nic" {
-  name                = "${var.prefix}-nic[count.index]"
+  name                = "${var.prefix}-nic${count.index}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   count = var.vmcount
@@ -44,10 +44,10 @@ resource "azurerm_network_interface" "nic" {
 }
 
 resource "azurerm_virtual_machine" "vm" {
-  name                  = "${var.prefix}-vm[count.index]"
+  name                  = "${var.prefix}-vm${count.index}"
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
-  network_interface_ids = [azurerm_network_interface.nic[count.index].id]
+  network_interface_ids = [element(azurerm_network_interface.nic.*.id, count.index)]
   vm_size               = "Standard_DS1_v2"
   count = var.vmcount
 
@@ -64,7 +64,7 @@ resource "azurerm_virtual_machine" "vm" {
     version   = "latest"
   }
   storage_os_disk {
-    name              = "${var.prefix}-osdisk[count.index]"
+    name              = "${var.prefix}-osdisk${count.index}"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
